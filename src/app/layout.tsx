@@ -1,4 +1,4 @@
-import NavHeader from "@/components/Navbar/NavHeader";
+import NavHeader from "@/components/NavbarUI/NavHeader";
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";

@@ -135,7 +135,7 @@ const Registration = ({ onSignIn, onSuccess }: RegistrationProps) => {
 
       if (data) {
         onSuccess?.();
-        router.push("/");
+        router.push(`/dashboard/${role.toLowerCase()}`);
         router.refresh();
       }
     } catch (error) {
@@ -169,12 +169,12 @@ const Registration = ({ onSignIn, onSuccess }: RegistrationProps) => {
             <select
               id="registration-role"
               name="role"
-              defaultValue="Buyer"
+              defaultValue="buyer"
               onChange={() => setRegistrationError("")}
               className="border-input focus-visible:ring-ring dark:bg-input/30 h-8 w-full min-w-0 rounded-lg border bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
             >
-              <option value="Buyer">Buyer</option>
-              <option value="Seller">Seller</option>
+              <option value="buyer">Buyer</option>
+              <option value="seller">Seller</option>
             </select>
           </Field>
 

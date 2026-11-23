@@ -1,4 +1,5 @@
 "use client";
+import { authClient } from "@/lib/auth-client";
 
 import { useState, type FormEvent } from "react";
 import { FaGoogle } from "react-icons/fa";
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Registration from "./Registration";
 
@@ -80,14 +80,15 @@ const SignIn = ({ onSuccess }: SignInProps) => {
       });
 
       if (error) {
-        setLoginError(
-          error.message || "Sign in failed. Please try again.",
-        );
+        setLoginError(error.message || "Sign in failed. Please try again.");
         return;
       }
       if (data) {
+        const role =
+          (data.user as { role?: string } | undefined)?.role?.toLowerCase() ||
+          "buyer";
         handleSuccess();
-        router.push("/");
+        router.push(`/dashboard/${role}`);
         router.refresh();
       }
     } catch (error) {

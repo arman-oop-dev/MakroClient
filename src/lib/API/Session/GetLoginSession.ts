@@ -1,3 +1,4 @@
+// for using navbar
 import { authClient } from "@/lib/auth-client";
 export const getLoginSession = async () => {
   const { data: session } = await authClient.getSession();
@@ -6,5 +7,5 @@ export const getLoginSession = async () => {
     throw new Error("User isn't valid or exist");
   }
 
-  return session.user.name;
+  return session;
 };

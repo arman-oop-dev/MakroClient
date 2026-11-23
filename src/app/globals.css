@@ -65,7 +65,7 @@
 
   --radius: 0.625rem;
 
-  --sidebar: #f8fafc;
+  --sidebar: #ffffff;
   --sidebar-foreground: #101217;
   --sidebar-primary: #0097b2;
   --sidebar-primary-foreground: #ffffff;
@@ -109,13 +109,13 @@
   --chart-4: #94a3b8;
   --chart-5: #cbd5e1;
 
-  --sidebar: #1a2029;
-  --sidebar-foreground: #ffffff;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #101217;
   --sidebar-primary: #0097b2;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #26313a;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #303944;
+  --sidebar-accent: #e6f4f6;
+  --sidebar-accent-foreground: #073b4c;
+  --sidebar-border: #e2e8f0;
   --sidebar-ring: #0097b2;
 }
 
@@ -137,5 +137,32 @@
   }
   html {
     @apply font-sans;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+  }
+  .dashboard-scroll-area {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .dashboard-scroll-area::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .dashboard-scroll-area::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 999px;
+  }
+  .dashboard-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  [data-slot="sidebar-container"],
+  [data-sidebar="sidebar"],
+  [data-slot="sidebar-gap"],
+  [data-slot="sidebar"][data-mobile="true"] {
+    background-color: #ffffff;
+  }
+  [data-slot="sidebar"][data-mobile="true"] {
+    color: #101217;
   }
 }
