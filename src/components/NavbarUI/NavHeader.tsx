@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { useLoginSession } from "@/lib/API/Session/UseLoginSession";
 import { FiMenu } from "react-icons/fi";
 import LoginDrawer from "./LoginDrawer";
 import LoginUserNavLink from "./LoginUserNav";
@@ -26,8 +25,13 @@ const navLinkClass = (active: boolean) =>
     active && "text-white after:scale-x-100",
   );
 
-const NavHeader = () => {
-  const { user, isPending } = useLoginSession();
+interface UserInfoProps {
+  name: string;
+  role: string;
+  isPending?: boolean;
+}
+
+const NavHeader = ({ name, role, isPending = false }: UserInfoProps) => {
   const pathname = usePathname();
 
   return (
@@ -92,8 +96,8 @@ const NavHeader = () => {
           >
             {isPending ? (
               <div className="h-9 w-24 animate-pulse rounded-lg bg-white/10" />
-            ) : user ? (
-              <LoginUserNavLink name={user.name} role={user.role} />
+            ) : name ? (
+              <LoginUserNavLink name={name} role={role} />
             ) : (
               <LoginDrawer />
             )}
