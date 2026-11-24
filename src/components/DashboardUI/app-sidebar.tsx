@@ -7,16 +7,11 @@ import {
   LayoutDashboard,
   Megaphone,
   ReceiptText,
-  User,
   Users,
   type LucideIcon,
 } from "lucide-react";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarRail,
-} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarRail } from "@/components/ui/sidebar";
 
 import SidebarNavigation, {
   type DashboardMenuGroup,
@@ -67,12 +62,6 @@ export const menuItemByRole: Record<string, MenuItem[]> = {
       icon: CreditCard,
       group: "Management",
     },
-    {
-      name: "My Profile",
-      url: "/dashboard/admin/my-profile",
-      icon: User,
-      group: "Account",
-    },
   ],
   buyer: [
     {
@@ -100,12 +89,6 @@ export const menuItemByRole: Record<string, MenuItem[]> = {
       icon: ReceiptText,
       group: "My activity",
     },
-    {
-      name: "My Profile",
-      url: "/dashboard/buyer/my-profile",
-      icon: User,
-      group: "Account",
-    },
   ],
   seller: [
     {
@@ -119,19 +102,12 @@ export const menuItemByRole: Record<string, MenuItem[]> = {
       url: "/dashboard/seller/my-ads",
       icon: FileText,
       group: "Seller tools",
-      badge: "9",
     },
     {
       name: "Payment History",
       url: "/dashboard/seller/payment-history",
       icon: ReceiptText,
       group: "Seller tools",
-    },
-    {
-      name: "My Profile",
-      url: "/dashboard/seller/my-profile",
-      icon: User,
-      group: "Account",
     },
   ],
 };
@@ -145,8 +121,7 @@ const groupOrderByRole: Record<string, string[]> = {
 const AppSidebar = ({ role }: AppSidebarProps) => {
   const normalizedRole = role.toLowerCase();
   const items = menuItemByRole[normalizedRole] ?? menuItemByRole.buyer;
-  const groupOrder =
-    groupOrderByRole[normalizedRole] ?? groupOrderByRole.buyer;
+  const groupOrder = groupOrderByRole[normalizedRole] ?? groupOrderByRole.buyer;
 
   const groups: DashboardMenuGroup[] = groupOrder
     .map((label) => ({
