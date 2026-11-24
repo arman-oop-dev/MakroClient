@@ -8,12 +8,17 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { getDashboardPageTitle } from "./dashboard-page-title";
 
-type DashboardTopbarProps = {
-  role: string;
+const getRoleFromPathname = (pathname: string) => {
+  const segment = pathname.split("/")[2]?.toLowerCase();
+  if (segment === "admin" || segment === "buyer" || segment === "seller") {
+    return segment;
+  }
+  return "buyer";
 };
 
-const DashboardTopbar = ({ role }: DashboardTopbarProps) => {
+const DashboardTopbar = () => {
   const pathname = usePathname();
+  const role = getRoleFromPathname(pathname);
   const title = getDashboardPageTitle(role, pathname);
 
   return (

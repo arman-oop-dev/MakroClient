@@ -1,49 +1,38 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { auth } from "@/lib/auth";
 
-import AppSidebar from "./app-sidebar";
-import { DashboardProvider } from "./dashboard-context";
+import DashboardShellContent from "./dashboard-shell-content";
+import DashboardShellSidebar from "./dashboard-shell-sidebar";
 import DashboardTopbar from "./dashboard-topbar";
 
 type DashboardShellProps = {
   children: React.ReactNode;
 };
 
-const DashboardShell = async ({ children }: DashboardShellProps) => {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session) {
-    redirect("/");
-  }
-
-  const role = session.user.role?.toLowerCase() || "buyer";
-  const userName = session.user.name || "User";
-  const userEmail = session.user.email;
-
+const DashboardShell = ({ children }: DashboardShellProps) => {
   return (
-    <DashboardProvider value={{ role, userName, userEmail }}>
-      <SidebarProvider
-        defaultOpen
-        className="!min-h-0 flex-1 bg-background"
+    <SidebarProvider defaultOpen className="!min-h-0 flex-1 bg-background">
+      <Suspense
+        fallback={
+          <aside className="sticky top-[3.5625rem] hidden h-[calc(100svh-3.5625rem)] w-64 shrink-0 self-start border-r border-border/70 bg-sidebar md:block" />
+        }
       >
-        <AppSidebar role={role} />
+        <DashboardShellSidebar />
+      </Suspense>
 
-        <SidebarInset className="min-w-0 overflow-hidden bg-muted/20">
-          <DashboardTopbar role={role} />
+      <SidebarInset className="min-w-0 overflow-hidden bg-muted/20">
+        <DashboardTopbar />
 
-          <div className="dashboard-scroll-area flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-              {children}
-            </div>
+        <div className="dashboard-scroll-area flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <Suspense fallback={<div className="h-52 w-full rounded-2xl bg-muted/40" />}>
+              <DashboardShellContent>{children}</DashboardShellContent>
+            </Suspense>
           </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </DashboardProvider>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 

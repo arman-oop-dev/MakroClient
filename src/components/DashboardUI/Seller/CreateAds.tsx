@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -13,14 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from "@/components/ui/input-group";
-
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -29,6 +21,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
@@ -42,13 +40,33 @@ import { authClient } from "@/lib/auth-client";
 import { cn } from "cn";
 
 const textareaClassName =
-  "border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 w-full min-w-0 rounded-lg border bg-transparent px-2.5 py-2 text-base transition-colors outline-none focus-visible:ring-3 placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40";
+  "border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 w-full min-w-0 rounded-lg border bg-transparent px-3 py-2.5 text-base transition-colors outline-none focus-visible:ring-3 placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40";
 
 const rentTypeOptions = [
   { label: "Per Hour", value: "hour" },
   { label: "Per Day", value: "day" },
   { label: "Per Week", value: "week" },
   { label: "Per Month", value: "month" },
+];
+
+const categoryOptions = [
+  { label: "Construction", value: "construction" },
+  { label: "Photography", value: "photography" },
+  { label: "Vehicles", value: "vehicles" },
+  { label: "Agriculture", value: "agriculture" },
+  { label: "Event/Program", value: "events" },
+  { label: "Others", value: "others" },
+];
+
+const cityOptions = [
+  { label: "Barishal", value: "Barishal" },
+  { label: "Chattogram", value: "Chattogram" },
+  { label: "Dhaka", value: "Dhaka" },
+  { label: "Khulna", value: "Khulna" },
+  { label: "Mymensingh", value: "Mymensingh" },
+  { label: "Rajshahi", value: "Rajshahi" },
+  { label: "Rangpur", value: "Rangpur" },
+  { label: "Sylhet", value: "Sylhet" },
 ];
 
 const CreateAds = () => {
@@ -70,16 +88,39 @@ const CreateAds = () => {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+
     const title = String(formData.get("title") ?? "").trim();
     const description = String(formData.get("description") ?? "").trim();
+    const category = String(formData.get("category") ?? "").trim();
     const price = Number(formData.get("price"));
-    const rentType = String(formData.get("rentType") ?? "day");
+    const quantity = Number(formData.get("quantity"));
+    const rentType = String(formData.get("rentType") ?? "").trim();
+    const apartment = String(formData.get("apartment") ?? "").trim();
+    const postCode = String(formData.get("postCode") ?? "").trim();
+    const city = String(formData.get("city") ?? "").trim();
     const imageFile = formData.get("image");
+
+    if (!category) {
+      setSubmitError("Please select a category.");
+      return;
+    }
+
+    if (!rentType) {
+      setSubmitError("Please select a rent type.");
+      return;
+    }
+
+    if (!city) {
+      setSubmitError("Please select a city.");
+      return;
+    }
 
     if (!(imageFile instanceof File) || imageFile.size === 0) {
       setSubmitError("Please select an image.");
       return;
     }
+
+    const location = `${apartment}, ${postCode}, ${city}, Bangladesh`;
 
     setIsSubmitting(true);
 
@@ -114,8 +155,11 @@ const CreateAds = () => {
       const adsInfo = {
         title,
         description,
+        category,
         price,
         rentType,
+        location,
+        quantity,
         image,
       };
 
@@ -164,47 +208,57 @@ const CreateAds = () => {
           </Button>
         }
       />
-      <AlertDialogContent className="max-h-[calc(100vh-2rem)] min-w-full overflow-y-auto bg-background p-0 sm:max-w-2xl">
-        <div className="p-6">
-          <AlertDialogHeader className="mb-5 space-y-1.5 text-left">
-            <AlertDialogTitle className="text-xl font-semibold tracking-tight">
-              Create Ads
+      <AlertDialogContent className="max-h-[calc(100vh-2rem)] min-w-[calc(80vh-2rem)] overflow-y-auto bg-background p-0 sm:max-w-3xl">
+        <div className="border-b border-border/70 bg-muted/20 px-6 py-5 sm:px-8">
+          <AlertDialogHeader className="space-y-1.5 text-left">
+            <AlertDialogTitle className="text-2xl font-semibold tracking-tight text-foreground">
+              Create New Ad
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-muted-foreground">
-              Share the details of your ad. Add a clear title, description,
-              price, and image to attract buyers.
+            <AlertDialogDescription className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              Fill in the details below to publish your rental ad. Clear
+              information and a good image help attract more buyers.
             </AlertDialogDescription>
           </AlertDialogHeader>
+        </div>
 
-          <form
-            className="flex flex-col gap-5"
-            noValidate={false}
-            onSubmit={handlerPostSubmit}
-          >
-            {submitError && (
-              <div
-                role="alert"
-                className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-              >
-                {submitError}
+        <form
+          className="flex flex-col gap-6 px-6 py-6 sm:px-8 sm:py-7"
+          noValidate={false}
+          onSubmit={handlerPostSubmit}
+        >
+          {submitError && (
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            >
+              {submitError}
+            </div>
+          )}
+
+          <FieldGroup className="gap-6">
+            <section className="space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Ad details
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Basic information about what you are renting.
+                </p>
               </div>
-            )}
-            <FieldGroup className="gap-5">
+
               <Field>
                 <FieldLabel htmlFor="ad-title">Title</FieldLabel>
                 <Input
                   id="ad-title"
                   name="title"
                   type="text"
-                  placeholder="Enter ad title"
+                  placeholder="e.g. Professional DSLR Camera"
                   minLength={3}
                   maxLength={100}
                   required
                   autoComplete="off"
+                  className="h-10"
                 />
-                <FieldDescription>
-                  Use 3 to 100 characters for a short, clear title.
-                </FieldDescription>
               </Field>
 
               <Field>
@@ -212,67 +266,163 @@ const CreateAds = () => {
                 <textarea
                   id="ad-description"
                   name="description"
-                  placeholder="Describe your ad, condition, and key details..."
+                  placeholder="Describe the item condition, included accessories, and any rental notes..."
                   minLength={20}
                   required
                   rows={5}
-                  className={cn(textareaClassName, "min-h-28 resize-y")}
+                  className={cn(textareaClassName, "min-h-32 resize-y")}
                 />
-                <FieldDescription>
-                  Write at least 20 characters so buyers understand your ad.
-                </FieldDescription>
               </Field>
 
-              <Field>
-                <FieldLabel htmlFor="ad-price">Asking Price</FieldLabel>
-                <InputGroup className="h-10">
-                  <InputGroupInput
-                    id="ad-price"
-                    name="price"
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="ad-category">Category</FieldLabel>
+                  <Select items={categoryOptions} name="category" required>
+                    <SelectTrigger id="ad-category" className="h-10 w-full">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      <SelectGroup>
+                        {categoryOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="ad-rent-type">Rent Type</FieldLabel>
+                  <Select items={rentTypeOptions} name="rentType" required>
+                    <SelectTrigger id="ad-rent-type" className="h-10 w-full">
+                      <SelectValue placeholder="Select rent type" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      <SelectGroup>
+                        {rentTypeOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </section>
+
+            <section className="space-y-4 border-t border-border/70 pt-6">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Pricing & availability
+                </h3>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="ad-price">Asking Price</FieldLabel>
+                  <InputGroup className="h-10">
+                    <InputGroupInput
+                      id="ad-price"
+                      name="price"
+                      type="number"
+                      min="0"
+                      step="any"
+                      placeholder="0.00"
+                      required
+                      className="h-10"
+                    />
+                    <InputGroupAddon
+                      align="inline-end"
+                      className="font-medium text-muted-foreground"
+                    >
+                      <InputGroupText>BDT</InputGroupText>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="ad-quantity">Quantity</FieldLabel>
+                  <Input
+                    id="ad-quantity"
+                    name="quantity"
                     type="number"
-                    min="0"
-                    step="any"
-                    placeholder="0.00"
+                    placeholder="1"
+                    min={1}
                     required
+                    autoComplete="off"
                     className="h-10"
                   />
-                  <InputGroupAddon
-                    align="inline-end"
-                    className="text-muted-foreground font-medium"
-                  >
-                    <InputGroupText>BDT</InputGroupText>
-                  </InputGroupAddon>
-                </InputGroup>
-                <FieldDescription>
-                  Set the amount you want to charge.
-                </FieldDescription>
-              </Field>
+                </Field>
+              </div>
+            </section>
+
+            <section className="space-y-4 border-t border-border/70 pt-6">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Location
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Where renters can find or pick up this item.
+                </p>
+              </div>
 
               <Field>
-                <FieldLabel htmlFor="ad-rent-type">Rent For</FieldLabel>
-                <Select
-                  items={rentTypeOptions}
-                  defaultValue="day"
-                  name="rentType"
-                >
-                  <SelectTrigger id="ad-rent-type" className="h-10 w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectGroup>
-                      {rentTypeOptions.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <FieldDescription>
-                  Choose how the rental price is billed.
-                </FieldDescription>
+                <FieldLabel htmlFor="ad-apartment">
+                  Apartment / House / Area
+                </FieldLabel>
+                <Input
+                  id="ad-apartment"
+                  name="apartment"
+                  type="text"
+                  placeholder="House, road, village, or block"
+                  maxLength={100}
+                  required
+                  autoComplete="off"
+                  className="h-10"
+                />
               </Field>
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel htmlFor="ad-postcode">Post Code</FieldLabel>
+                  <Input
+                    id="ad-postcode"
+                    name="postCode"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="e.g. 1207"
+                    pattern="[0-9]{4}"
+                    maxLength={4}
+                    required
+                    autoComplete="postal-code"
+                    className="h-10"
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel htmlFor="ad-city">City</FieldLabel>
+                  <Select items={cityOptions} name="city" required>
+                    <SelectTrigger id="ad-city" className="h-10 w-full">
+                      <SelectValue placeholder="Select a city" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      <SelectGroup>
+                        {cityOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            </section>
+
+            <section className="space-y-4 border-t border-border/70 pt-6">
               <Field>
                 <FieldLabel htmlFor="ad-image">Ad Image</FieldLabel>
                 <Input
@@ -287,18 +437,36 @@ const CreateAds = () => {
                   Upload a PNG, JPG, or JPEG image for your ad.
                 </FieldDescription>
               </Field>
-            </FieldGroup>
+            </section>
+          </FieldGroup>
 
+          <div className="flex flex-col-reverse gap-3 border-t border-border/70 sm:flex-row sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+              className="sm:min-w-28"
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
               aria-busy={isSubmitting}
-              className="h-11 w-full text-base font-semibold"
+              className="gap-2 sm:min-w-36"
             >
-              {isSubmitting ? "Submitting..." : "Submit Ads"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Ad"
+              )}
             </Button>
-          </form>
-        </div>
+          </div>
+        </form>
       </AlertDialogContent>
     </AlertDialog>
   );

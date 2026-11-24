@@ -124,7 +124,6 @@ const AppSidebar = ({ role }: AppSidebarProps) => {
           name: item.name,
           url: item.url,
           icon: <item.icon aria-hidden="true" />,
-          badge: item.badge,
         })),
     }))
     .filter((group) => group.items.length > 0);

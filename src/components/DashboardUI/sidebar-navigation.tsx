@@ -9,7 +9,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
@@ -75,12 +74,6 @@ const SidebarNavigation = ({ groups }: { groups: DashboardMenuGroup[] }) => {
                       </span>
                       <span className="truncate">{item.name}</span>
                     </SidebarMenuButton>
-
-                    {item.badge ? (
-                      <SidebarMenuBadge className="bg-primary/10 text-[10px] font-semibold text-primary">
-                        {item.badge}
-                      </SidebarMenuBadge>
-                    ) : null}
                   </SidebarMenuItem>
                 );
               })}
