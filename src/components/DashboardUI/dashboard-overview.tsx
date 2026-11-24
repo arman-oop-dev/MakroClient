@@ -21,7 +21,7 @@ const overviewByRole: Record<string, OverviewConfig> = {
       "Here is what is happening across Markro today. Stay on top of users, ads, approvals, and payments from one place.",
     primaryAction: {
       label: "Review pending ads",
-      href: "/dashboard/admin/ads-approval",
+      href: "/dashboard/admin/manage-ads",
     },
     secondaryAction: {
       label: "Manage users",

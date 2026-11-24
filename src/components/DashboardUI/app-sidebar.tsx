@@ -1,6 +1,5 @@
 import {
   CalendarCheck,
-  CircleCheck,
   CreditCard,
   FileText,
   Heart,
@@ -48,13 +47,6 @@ export const menuItemByRole: Record<string, MenuItem[]> = {
       url: "/dashboard/admin/manage-ads",
       icon: Megaphone,
       group: "Management",
-    },
-    {
-      name: "Ads Approval",
-      url: "/dashboard/admin/ads-approval",
-      icon: CircleCheck,
-      group: "Management",
-      badge: "3",
     },
     {
       name: "Payment Management",
