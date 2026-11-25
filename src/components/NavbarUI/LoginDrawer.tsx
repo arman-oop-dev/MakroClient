@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   AlertDialog,
@@ -14,30 +14,47 @@ import SignIn from "./SignIn";
 
 interface LoginDrawerProps {
   onAuthenticated?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  redirectTo?: string;
 }
 
-const LoginDrawer = ({ onAuthenticated }: LoginDrawerProps) => {
-  const [open, setOpen] = useState(false);
+const LoginDrawer = ({
+  onAuthenticated,
+  open,
+  onOpenChange,
+  redirectTo,
+}: LoginDrawerProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+  const isOpen = open ?? internalOpen;
+
+  const setIsOpen = useCallback(
+    (value: boolean) => {
+      if (open === undefined) setInternalOpen(value);
+      onOpenChange?.(value);
+    },
+    [open, onOpenChange],
+  );
 
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
       if (
         contentRef.current &&
         !contentRef.current.contains(event.target as Node)
       ) {
-        setOpen(false);
+        setIsOpen(false);
       }
     };
 
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
-  }, [open]);
+  }, [isOpen, setIsOpen]);
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger className="hover:cursor-pointer" render={<Button />}>
         <FiUser />
         Login
@@ -45,8 +62,9 @@ const LoginDrawer = ({ onAuthenticated }: LoginDrawerProps) => {
       <AlertDialogContent ref={contentRef} className="bg-accent-foreground">
         <AlertDialogHeader>
           <SignIn
+            redirectTo={redirectTo}
             onSuccess={() => {
-              setOpen(false);
+              setIsOpen(false);
               onAuthenticated?.();
             }}
           />

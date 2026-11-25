@@ -8,7 +8,7 @@ const HeroBanner = () => {
       <div className="absolute -top-32 -right-20 -z-10 size-[28rem] rounded-full bg-primary/25 blur-[100px]" />
       <div className="absolute -bottom-24 left-1/4 -z-10 size-72 rounded-full bg-cyan-300/10 blur-[90px]" />
 
-      <div className="mx-auto flex min-h-[70vh] w-full max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[54vh] w-full max-w-4xl flex-col items-center justify-center px-4 py-12 text-center sm:min-h-[70vh] sm:px-6 sm:py-24 lg:px-8">
         <h1 className="text-4xl leading-[1.05] font-semibold tracking-[-0.045em] sm:text-5xl lg:text-6xl xl:text-7xl">
           Find the right gear
           <span className="block text-cyan-300">for every job</span>

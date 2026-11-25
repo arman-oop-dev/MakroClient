@@ -3,7 +3,7 @@
 import { cn } from "cn";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 
@@ -48,7 +48,17 @@ interface UserInfoProps {
 
 const NavHeader = ({ name, role, isPending = false }: UserInfoProps) => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const requestedRedirect = searchParams.get("redirectTo");
+  const redirectTo =
+    requestedRedirect?.startsWith("/") && !requestedRedirect.startsWith("//")
+      ? requestedRedirect
+      : undefined;
+  const [loginOpen, setLoginOpen] = useState(
+    () => searchParams.get("signIn") === "1" && !name,
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/30 bg-accent text-accent-foreground">
@@ -150,7 +160,11 @@ const NavHeader = ({ name, role, isPending = false }: UserInfoProps) => {
           ) : name ? (
             <LoginUserNavLink name={name} role={role} />
           ) : (
-            <LoginDrawer />
+            <LoginDrawer
+              open={loginOpen}
+              onOpenChange={setLoginOpen}
+              redirectTo={redirectTo}
+            />
           )}
         </nav>
       </div>

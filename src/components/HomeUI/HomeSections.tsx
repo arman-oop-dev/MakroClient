@@ -7,7 +7,6 @@ import {
   Construction,
   Laptop,
   LockKeyhole,
-  MapPin,
   PartyPopper,
   Search,
   ShieldCheck,
@@ -18,7 +17,6 @@ import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import AuthProductLink from "@/components/BrowseUI/AuthProductLink";
 import ProductCard, { type BrowseAd } from "@/components/BrowseUI/ProductCard";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,21 +37,6 @@ const getAds = async (query: string): Promise<BrowseAd[]> => {
     return [];
   }
 };
-
-const rentTypeLabels: Record<string, string> = {
-  hour: "hour",
-  day: "day",
-  week: "week",
-  month: "month",
-};
-
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("en-BD", { maximumFractionDigits: 2 }).format(value);
-
-const formatLabel = (value?: string) =>
-  value
-    ? value.charAt(0).toUpperCase() + value.slice(1)
-    : "Equipment";
 
 interface SectionHeadingProps {
   eyebrow: string;
@@ -152,75 +135,6 @@ const AdGrid = ({ ads }: { ads: BrowseAd[] }) => {
   );
 };
 
-const FleetCard = ({ ad }: { ad: BrowseAd }) => {
-  const location = [ad.city, ad.location].filter(Boolean).join(" · ");
-  const rentLabel = rentTypeLabels[ad.rentType ?? "day"] ?? "day";
-
-  return (
-    <AuthProductLink
-      href={`/ads/${ad._id}`}
-      className="group relative block overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-      ariaLabel={`View details for ${ad.title}`}
-    >
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-        <Image
-          src={ad.image}
-          alt={`${ad.title} preview`}
-          fill
-          unoptimized
-          sizes="(min-width: 768px) 33vw, 50vw"
-          className="object-cover transition duration-700 group-hover:scale-105"
-        />
-        <span className="absolute top-4 left-4 rounded-full bg-[#052e3b]/85 px-3 py-1 text-[11px] font-semibold text-cyan-200 backdrop-blur-md">
-          {formatLabel(ad.category)}
-        </span>
-        <span className="absolute right-4 bottom-4 flex size-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition duration-300 group-hover:rotate-45">
-          <ArrowUpRight className="size-5" aria-hidden="true" />
-        </span>
-      </div>
-
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="min-w-0 truncate text-lg font-semibold tracking-tight text-foreground">
-            {ad.title}
-          </h3>
-          <p className="shrink-0 text-base font-bold text-primary">
-            {formatPrice(ad.price)}
-            <span className="text-xs font-medium text-muted-foreground">
-              /{rentLabel}
-            </span>
-          </p>
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
-            <Clock className="size-3.5" aria-hidden="true" />
-            {formatLabel(rentLabel)} rental
-          </span>
-          {location && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1">
-              <MapPin className="size-3.5" aria-hidden="true" />
-              <span className="max-w-[10rem] truncate">{location}</span>
-            </span>
-          )}
-        </div>
-      </div>
-    </AuthProductLink>
-  );
-};
-
-const FleetGrid = ({ ads }: { ads: BrowseAd[] }) => {
-  if (!ads.length) return <EmptyState />;
-
-  return (
-    <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
-      {ads.map((ad) => (
-        <FleetCard key={ad._id} ad={ad} />
-      ))}
-    </div>
-  );
-};
-
 export const HomeSectionSkeleton = () => (
   <section className="py-20 sm:py-24">
     <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -274,7 +188,7 @@ export const FeaturedProducts = async () => {
           href="/browse-ads"
           linkLabel="View all equipment"
         />
-        <FleetGrid ads={ads} />
+        <AdGrid ads={ads} />
       </div>
     </section>
   );
@@ -473,10 +387,6 @@ const benefits: BenefitItem[] = [
 export const WhyChooseUs = async () => {
   const ads = await getAds("?limit=1&sort=price");
   const visualAd = ads[0];
-  const location = [visualAd?.city, visualAd?.location]
-    .filter(Boolean)
-    .join(" · ");
-  const rentLabel = rentTypeLabels[visualAd?.rentType ?? "day"] ?? "day";
 
   return (
     <section className="relative isolate overflow-hidden bg-[#052e3b] py-20 sm:py-24">
@@ -484,64 +394,20 @@ export const WhyChooseUs = async () => {
       <div className="absolute -left-24 top-10 -z-10 size-80 rounded-full bg-primary/20 blur-3xl" />
       <div className="absolute -right-24 -bottom-20 -z-10 size-80 rounded-full bg-cyan-300/10 blur-3xl" />
 
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:px-8">
-        <div className="relative mx-auto w-full max-w-lg">
-          <div className="absolute -inset-4 rounded-[2.5rem] border border-white/10" />
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[2.25rem] border border-white/15 bg-white/10">
-            {visualAd ? (
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[2.25rem] border border-white/15 bg-white/10 sm:aspect-[16/9]">
+            {visualAd && (
               <Image
                 src={visualAd.image}
                 alt={`${visualAd.title} preview`}
                 fill
                 unoptimized
-                sizes="(min-width: 1024px) 38vw, 100vw"
+                sizes="(min-width: 1280px) 1280px, 100vw"
                 className="object-cover"
               />
-            ) : (
-              <div className="flex h-full items-center justify-center px-8 text-center text-sm text-white/60">
-                Trusted equipment is waiting for you.
-              </div>
-            )}
-            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(2,20,28,0.85),transparent)]" />
-            {visualAd && (
-              <div className="absolute right-5 bottom-5 left-5">
-                <p className="text-[11px] font-semibold tracking-widest text-cyan-200 uppercase">
-                  Approved listing
-                </p>
-                <h3 className="mt-1 truncate text-xl font-semibold text-white">
-                  {visualAd.title}
-                </h3>
-                {location && (
-                  <p className="mt-1 flex items-center gap-1.5 text-xs text-white/70">
-                    <MapPin className="size-3.5" aria-hidden="true" />
-                    {location}
-                  </p>
-                )}
-              </div>
             )}
           </div>
-
-          <div className="absolute -top-4 -right-3 hidden items-center gap-2 rounded-2xl border border-white/15 bg-[#073b4c]/90 px-4 py-3 shadow-xl backdrop-blur-xl sm:flex">
-            <ShieldCheck className="size-5 text-cyan-200" aria-hidden="true" />
-            <div>
-              <p className="text-xs font-semibold">Verified owner</p>
-              <p className="text-[10px] text-white/60">Approved listing</p>
-            </div>
-          </div>
-
-          {visualAd && (
-            <div className="absolute -bottom-4 -left-3 hidden rounded-2xl border border-white/15 bg-[#073b4c]/90 px-4 py-3 shadow-xl backdrop-blur-xl sm:block">
-              <p className="text-[10px] font-semibold tracking-widest text-white/50 uppercase">
-                Starting at
-              </p>
-              <p className="mt-1 text-lg font-semibold text-white">
-                {formatPrice(visualAd.price)}
-                <span className="text-xs font-normal text-white/60">
-                  /{rentLabel}
-                </span>
-              </p>
-            </div>
-          )}
         </div>
 
         <div>
