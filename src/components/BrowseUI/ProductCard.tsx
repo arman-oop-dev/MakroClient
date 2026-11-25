@@ -15,6 +15,7 @@ export type BrowseAd = {
   quantity?: number;
   description?: string;
   image: string;
+  sellerID?: { _id: string; name?: string; email?: string; image?: string } | string | null;
   status?: string;
   terms_condition?: string;
   createdAt?: string;

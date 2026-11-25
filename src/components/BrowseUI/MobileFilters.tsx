@@ -34,7 +34,7 @@ const MobileFilters = (props: MobileFiltersProps) => {
       <SheetContent
         side="left"
         showCloseButton={false}
-        className="w-[min(88vw,22rem)] overflow-y-auto p-0"
+        className="w-[min(88vw,22rem)] overflow-y-auto border-border bg-white p-0 text-foreground"
       >
         <SheetHeader className="sr-only">
           <SheetTitle>Browse filters</SheetTitle>

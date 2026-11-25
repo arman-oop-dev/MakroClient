@@ -1,3 +1,4 @@
+import SiteFooter from "@/components/FooterUI/SiteFooter";
 import NavHeader from "@/components/NavbarUI/NavHeader";
 import AppToaster from "@/components/ui/app-toaster";
 import { auth } from "@/lib/auth";
@@ -40,7 +41,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           <RootNavHeader />
         </Suspense>
-        {children}
+        <div className="flex flex-1 flex-col">{children}</div>
+        <Suspense fallback={null}>
+          <SiteFooter />
+        </Suspense>
       </body>
     </html>
   );
