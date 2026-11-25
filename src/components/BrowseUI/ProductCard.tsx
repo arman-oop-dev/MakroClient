@@ -50,7 +50,7 @@ const ProductCard = ({ ad }: ProductCardProps) => {
             alt={`${ad.title} preview`}
             fill
             unoptimized
-            sizes="(min-width: 640px) 50vw, 100vw"
+            sizes="(min-width: 768px) 33vw, 50vw"
             className="object-cover transition duration-500 group-hover/card:scale-105"
           />
         </div>

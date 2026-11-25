@@ -144,7 +144,7 @@ const AdGrid = ({ ads }: { ads: BrowseAd[] }) => {
   if (!ads.length) return <EmptyState />;
 
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
       {ads.map((ad) => (
         <ProductCard key={ad._id} ad={ad} />
       ))}
@@ -168,7 +168,7 @@ const FleetCard = ({ ad }: { ad: BrowseAd }) => {
           alt={`${ad.title} preview`}
           fill
           unoptimized
-          sizes="(min-width: 640px) 50vw, 100vw"
+          sizes="(min-width: 768px) 33vw, 50vw"
           className="object-cover transition duration-700 group-hover:scale-105"
         />
         <span className="absolute top-4 left-4 rounded-full bg-[#052e3b]/85 px-3 py-1 text-[11px] font-semibold text-cyan-200 backdrop-blur-md">
@@ -213,7 +213,7 @@ const FleetGrid = ({ ads }: { ads: BrowseAd[] }) => {
   if (!ads.length) return <EmptyState />;
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
       {ads.map((ad) => (
         <FleetCard key={ad._id} ad={ad} />
       ))}
@@ -227,7 +227,7 @@ export const HomeSectionSkeleton = () => (
       <Skeleton className="h-6 w-40 rounded-full" />
       <Skeleton className="mt-4 h-10 w-80 max-w-full rounded-xl" />
       <Skeleton className="mt-4 h-5 w-full max-w-xl" />
-      <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
+      <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <Card key={index} className="gap-0 overflow-hidden rounded-2xl py-0">
             <Skeleton className="aspect-[4/3] w-full rounded-none" />

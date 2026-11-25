@@ -180,7 +180,7 @@ const BrowseAdsContent = async ({
         ) : ads.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
             {ads.map((ad) => (
               <ProductCard key={ad._id} ad={ad} />
             ))}
@@ -208,7 +208,7 @@ const BrowseAdsSkeleton = () => (
 
     <div>
       <Skeleton className="mb-5 h-4 w-24" />
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <Card key={index} className="gap-0 overflow-hidden py-0">
             <Skeleton className="aspect-[4/3] w-full rounded-none" />
