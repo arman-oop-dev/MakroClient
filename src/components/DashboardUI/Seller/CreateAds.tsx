@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { useLoginSession } from "@/app/api/Session/UseLoginSession";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +35,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useLoginSession } from "@/lib/API/Session/UseLoginSession";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "cn";
 
@@ -69,13 +68,61 @@ const cityOptions = [
   { label: "Sylhet", value: "Sylhet" },
 ];
 
+const CHECKOUT_PATH = "/dashboard/seller/payment-history/checkout";
+
+type PostingStatus = {
+  canPost?: boolean;
+  isPaid?: boolean;
+  adCount?: number;
+  freeAdLimit?: number;
+};
+
 const CreateAds = () => {
   const router = useRouter();
   const { user } = useLoginSession();
   const sellerID = user?.id;
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  const handleOpenDialog = async () => {
+    if (isCheckingStatus) {
+      return;
+    }
+
+    setIsCheckingStatus(true);
+    setSubmitError("");
+
+    try {
+      const response = await fetch("/api/seller/posting-status", {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (response.ok) {
+        const status = (await response.json().catch(() => null)) as
+          | PostingStatus
+          | null;
+
+        if (status?.canPost === false) {
+          toast.error(
+            status.isPaid
+              ? "Your posting access is being refreshed. Please try again."
+              : "You have used your 2 free ads. Complete the one-time payment to keep posting.",
+          );
+          router.push(CHECKOUT_PATH);
+          return;
+        }
+      }
+
+      setOpen(true);
+    } catch {
+      setOpen(true);
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
 
   const handlerPostSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -102,6 +149,11 @@ const CreateAds = () => {
 
     if (!category) {
       setSubmitError("Please select a category.");
+      return;
+    }
+
+    if (!Number.isFinite(price) || price <= 0) {
+      setSubmitError("Please enter a valid price in USD.");
       return;
     }
 
@@ -177,6 +229,16 @@ const CreateAds = () => {
 
       const result = await res.json().catch(() => null);
 
+      if (res.status === 402 || result?.code === "PAYMENT_REQUIRED") {
+        setOpen(false);
+        toast.error(
+          result?.message ||
+            "You have used your 2 free ads. Complete the one-time payment to keep posting.",
+        );
+        router.push(CHECKOUT_PATH);
+        return;
+      }
+
       if (!res.ok) {
         throw new Error(
           result?.message || "Failed to create ad. Please try again.",
@@ -200,14 +262,20 @@ const CreateAds = () => {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger
-        render={
-          <Button className="gap-2 font-semibold">
-            <Plus className="size-4" aria-hidden="true" />
-            Create Ads
-          </Button>
-        }
-      />
+      <Button
+        type="button"
+        className="gap-2 font-semibold"
+        onClick={handleOpenDialog}
+        disabled={isCheckingStatus}
+        aria-busy={isCheckingStatus}
+      >
+        {isCheckingStatus ? (
+          <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        ) : (
+          <Plus className="size-4" aria-hidden="true" />
+        )}
+        {isCheckingStatus ? "Checking..." : "Create Ads"}
+      </Button>
       <AlertDialogContent className="max-h-[calc(100vh-2rem)] min-w-[calc(80vh-2rem)] overflow-y-auto bg-background p-0 sm:max-w-3xl">
         <div className="border-b border-border/70 bg-muted/20 px-6 py-5 sm:px-8">
           <AlertDialogHeader className="space-y-1.5 text-left">
@@ -322,15 +390,15 @@ const CreateAds = () => {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
-                  <FieldLabel htmlFor="ad-price">Asking Price</FieldLabel>
+                  <FieldLabel htmlFor="ad-price">Asking Price (USD)</FieldLabel>
                   <InputGroup className="h-10">
                     <InputGroupInput
                       id="ad-price"
                       name="price"
                       type="number"
-                      min="0"
-                      step="any"
-                      placeholder="0.00"
+                      min="0.01"
+                      step="0.01"
+                      placeholder="35.00"
                       required
                       className="h-10"
                     />
@@ -338,7 +406,7 @@ const CreateAds = () => {
                       align="inline-end"
                       className="font-medium text-muted-foreground"
                     >
-                      <InputGroupText>BDT</InputGroupText>
+                      <InputGroupText>USD</InputGroupText>
                     </InputGroupAddon>
                   </InputGroup>
                 </Field>

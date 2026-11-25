@@ -2,7 +2,6 @@
 import { authClient } from "@/lib/auth-client";
 
 import { useState, type FormEvent } from "react";
-import { FaGoogle } from "react-icons/fa";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 import { Button } from "@/components/ui/button";
@@ -91,6 +90,8 @@ const SignIn = ({ onSuccess, redirectTo }: SignInProps) => {
         handleSuccess();
         router.push(redirectTo ?? `/dashboard/${role}`);
         router.refresh();
+      } else {
+        setLoginError("Sign in failed. Please try again.");
       }
     } catch (error) {
       console.error("Unexpected sign in error:", error);
@@ -224,15 +225,6 @@ const SignIn = ({ onSuccess, redirectTo }: SignInProps) => {
           {isSubmitting ? "Sign In..." : "Sign In"}
         </Button>
       </form>
-
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full hover:cursor-pointer"
-      >
-        <FaGoogle aria-hidden="true" />
-        Login via Google
-      </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{" "}

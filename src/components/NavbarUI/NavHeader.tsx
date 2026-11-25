@@ -3,8 +3,8 @@
 import { cn } from "cn";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 
 import {
@@ -48,17 +48,28 @@ interface UserInfoProps {
 
 const NavHeader = ({ name, role, isPending = false }: UserInfoProps) => {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [redirectTo] = useState(() => {
+    if (typeof window === "undefined") return undefined;
 
-  const requestedRedirect = searchParams.get("redirectTo");
-  const redirectTo =
-    requestedRedirect?.startsWith("/") && !requestedRedirect.startsWith("//")
+    const requestedRedirect = new URLSearchParams(window.location.search).get(
+      "redirectTo",
+    );
+
+    return requestedRedirect?.startsWith("/") &&
+      !requestedRedirect.startsWith("//")
       ? requestedRedirect
       : undefined;
-  const [loginOpen, setLoginOpen] = useState(
-    () => searchParams.get("signIn") === "1" && !name,
-  );
+  });
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("signIn") === "1" && !name) {
+      queueMicrotask(() => setLoginOpen(true));
+    }
+  }, [name]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/30 bg-accent text-accent-foreground">

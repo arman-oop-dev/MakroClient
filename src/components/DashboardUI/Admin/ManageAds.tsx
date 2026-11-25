@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import {
   AlertCircle,
   CheckCircle2,
@@ -9,11 +10,11 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
-import { cn } from "cn";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+import { useLoginSession } from "@/app/api/Session/UseLoginSession";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -33,7 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { authClient } from "@/lib/auth-client";
-import { useLoginSession } from "@/lib/API/Session/UseLoginSession";
+import { formatUsdPrice } from "@/lib/payment";
 
 type AdStatus = "pending" | "approved" | "rejected";
 
@@ -92,8 +93,7 @@ const rentTypeLabels: Record<string, string> = {
   month: "month",
 };
 
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("en-BD", { maximumFractionDigits: 2 }).format(value);
+const formatPrice = formatUsdPrice;
 
 const formatDate = (value?: string) => {
   if (!value) return "—";
@@ -142,7 +142,7 @@ const TableSkeleton = () => (
         <TableHead className="w-24 pl-4">Image</TableHead>
         <TableHead>Ad</TableHead>
         <TableHead>Created by</TableHead>
-        <TableHead>Price</TableHead>
+        <TableHead>Price (USD)</TableHead>
         <TableHead>Status</TableHead>
         <TableHead>Posted</TableHead>
       </TableRow>
@@ -295,9 +295,7 @@ const ManageAds = () => {
           delete next[adID];
           return next;
         });
-        toast.success(
-          result?.message || "Ad status updated successfully",
-        );
+        toast.success(result?.message || "Ad status updated successfully");
       } catch (caught) {
         setSelectedStatuses((current) => ({
           ...current,
@@ -364,7 +362,9 @@ const ManageAds = () => {
             <p className="mt-4 text-sm font-semibold text-foreground">
               Could not load ads
             </p>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">{error}</p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              {error}
+            </p>
             <Button
               type="button"
               variant="outline"
@@ -397,7 +397,7 @@ const ManageAds = () => {
                 <TableHead className="w-24 pl-4">Image</TableHead>
                 <TableHead>Ad</TableHead>
                 <TableHead>Created by</TableHead>
-                <TableHead>Price</TableHead>
+                <TableHead>Price (USD)</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Posted</TableHead>
               </TableRow>
@@ -443,7 +443,7 @@ const ManageAds = () => {
                     </TableCell>
                     <TableCell>
                       <p className="font-medium text-foreground">
-                        ৳{formatPrice(ad.price)}
+                        {formatPrice(ad.price)}
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         / {rentTypeLabels[ad.rentType ?? "day"] ?? "day"}
@@ -472,7 +472,10 @@ const ManageAds = () => {
                         <SelectContent className="bg-white">
                           <SelectGroup>
                             {statusOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
                                 <StatusIcon status={option.value} />
                                 {option.label}
                               </SelectItem>

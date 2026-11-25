@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { getDashboardSession } from "@/lib/API/Session/GetDashboardSession";
+import { getDashboardSession } from "@/app/api/Session/GetDashboardSession";
 
 import AppSidebar from "./app-sidebar";
 

@@ -1,4 +1,4 @@
-import { ChevronRight, MapPin, Package, UserRound } from "lucide-react";
+import { ChevronRight, CircleAlert, MapPin, Package, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { auth } from "@/lib/auth";
+import { formatUsdPrice } from "@/lib/payment";
 
 const categoryLabels: Record<string, string> = {
   construction: "Construction",
@@ -30,8 +31,13 @@ const rentTypeLabels: Record<string, string> = {
   month: "month",
 };
 
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("en-BD", { maximumFractionDigits: 2 }).format(value);
+const checkoutMessages: Record<string, string> = {
+  canceled: "Checkout was canceled. No payment was taken.",
+  unavailable: "This item is no longer available for rent.",
+  error: "We could not start checkout. Please try again.",
+};
+
+const formatPrice = formatUsdPrice;
 
 const getSellerName = (sellerID: BrowseAd["sellerID"]) =>
   typeof sellerID === "object" && sellerID?.name?.trim()
@@ -68,8 +74,15 @@ const DetailsSkeleton = () => (
   </div>
 );
 
-const AdDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
-  const { id } = await params;
+const AdDetails = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout?: string }>;
+}) => {
+  const [{ id }, { checkout }] = await Promise.all([params, searchParams]);
+  const checkoutMessage = checkout ? checkoutMessages[checkout] : undefined;
 
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ads`, {
     cache: "no-store",
@@ -87,6 +100,16 @@ const AdDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <div>
+      {checkoutMessage && (
+        <div className="mb-6 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <CircleAlert
+            className="mt-0.5 size-4 shrink-0"
+            aria-hidden="true"
+          />
+          {checkoutMessage}
+        </div>
+      )}
+
       <nav
         aria-label="Breadcrumb"
         className="mb-6 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground"
@@ -187,16 +210,19 @@ const AdDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
               </span>
             </div>
 
-            <Button
-              type="button"
-              size="lg"
-              className="mt-6 w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Rent
-              <span className="ml-1 font-semibold">
-                {formatPrice(ad.price)}/{rentLabel}
-              </span>
-            </Button>
+            <form action="/api/buyer/rent-checkout" method="POST">
+              <input type="hidden" name="adId" value={ad._id} />
+              <Button
+                type="submit"
+                size="lg"
+                className="mt-6 w-full justify-center bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Rent
+                <span className="ml-1 font-semibold">
+                  {formatPrice(ad.price)}/{rentLabel}
+                </span>
+              </Button>
+            </form>
           </div>
         </CardContent>
       </Card>
@@ -206,8 +232,10 @@ const AdDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
 
 const AuthenticatedAdDetails = async ({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }) => {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -217,19 +245,21 @@ const AuthenticatedAdDetails = async ({
     unauthorized();
   }
 
-  return <AdDetails params={params} />;
+  return <AdDetails params={params} searchParams={searchParams} />;
 };
 
 const AdDetailsPage = ({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ checkout?: string }>;
 }) => {
   return (
     <main className="bg-background">
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
         <Suspense fallback={<DetailsSkeleton />}>
-          <AuthenticatedAdDetails params={params} />
+          <AuthenticatedAdDetails params={params} searchParams={searchParams} />
         </Suspense>
       </div>
     </main>

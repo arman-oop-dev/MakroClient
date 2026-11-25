@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { FaGoogle } from "react-icons/fa";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 import { Button } from "@/components/ui/button";
@@ -37,7 +36,7 @@ const validatePassword = (value: string) => {
 
   const requirements: string[] = [];
 
-  if (value.length < 6) requirements.push("at least 6 characters");
+  if (value.length < 8) requirements.push("at least 8 characters");
   if (!/[A-Z]/.test(value)) requirements.push("one uppercase letter");
   if (!/[a-z]/.test(value)) requirements.push("one lowercase letter");
   if (!/\d/.test(value)) requirements.push("one number");
@@ -49,7 +48,15 @@ const validatePassword = (value: string) => {
 };
 
 const validateFullName = (value: string) => {
-  if (!value.trim()) return "FullName is required.";
+  if (!value.trim()) return "Full name is required.";
+
+  return "";
+};
+
+const validateRole = (value: string) => {
+  if (value !== "buyer" && value !== "seller") {
+    return "Select a valid account type.";
+  }
 
   return "";
 };
@@ -96,6 +103,7 @@ const Registration = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullNameError, setFullNameError] = useState("");
+  const [roleError, setRoleError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [registrationError, setRegistrationError] = useState("");
@@ -111,15 +119,22 @@ const Registration = ({
     const role = String(formData.get("role") ?? "");
 
     const fullNameValidation = validateFullName(fullName);
+    const roleValidation = validateRole(role);
     const emailValidation = validateEmail(email);
     const passwordValidation = validatePassword(password);
 
     setFullNameError(fullNameValidation);
+    setRoleError(roleValidation);
     setEmailError(emailValidation);
     setPasswordError(passwordValidation);
     setRegistrationError("");
 
-    if (fullNameValidation || emailValidation || passwordValidation) {
+    if (
+      fullNameValidation ||
+      roleValidation ||
+      emailValidation ||
+      passwordValidation
+    ) {
       return;
     }
 
@@ -142,6 +157,8 @@ const Registration = ({
         onSuccess?.();
         router.push(redirectTo ?? `/dashboard/${role.toLowerCase()}`);
         router.refresh();
+      } else {
+        setRegistrationError("Registration failed. Please try again.");
       }
     } catch (error) {
       console.error("Unexpected signup error:", error);
@@ -154,7 +171,7 @@ const Registration = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <h2 className="text-lg font-semibold text-foreground">
-        Register via email and phone
+        Register via email
       </h2>
 
       {registrationError && (
@@ -169,22 +186,38 @@ const Registration = ({
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <FieldGroup>
-          <Field>
+          <Field data-invalid={roleError ? true : undefined}>
             <FieldLabel htmlFor="registration-role">Account type</FieldLabel>
             <select
               id="registration-role"
               name="role"
               defaultValue="buyer"
-              onChange={() => setRegistrationError("")}
+              onChange={(event) => {
+                setRegistrationError("");
+                if (roleError) {
+                  setRoleError(validateRole(event.currentTarget.value));
+                }
+              }}
+              aria-invalid={roleError ? true : undefined}
+              aria-describedby={roleError ? "registration-role-error" : undefined}
               className="border-input focus-visible:ring-ring dark:bg-input/30 h-8 w-full min-w-0 rounded-lg border bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
             >
               <option value="buyer">Buyer</option>
               <option value="seller">Seller</option>
             </select>
+            {roleError && (
+              <FieldDescription
+                id="registration-role-error"
+                role="alert"
+                className="text-destructive text-red-600"
+              >
+                {roleError}
+              </FieldDescription>
+            )}
           </Field>
 
           <Field data-invalid={fullNameError ? true : undefined}>
-            <FieldLabel htmlFor="registration-name">FullName</FieldLabel>
+            <FieldLabel htmlFor="registration-name">Full name</FieldLabel>
             <Input
               id="registration-name"
               name="fullName"
@@ -310,11 +343,6 @@ const Registration = ({
           {isSubmitting ? "Registering..." : "Register"}
         </Button>
       </form>
-
-      <Button type="button" variant="outline" className="w-full">
-        <FaGoogle aria-hidden="true" />
-        Login via Google
-      </Button>
 
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}

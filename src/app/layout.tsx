@@ -37,7 +37,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col" cz-shortcut-listen="true">
         <AppToaster />
         <Suspense
-          fallback={<div className="h-[73px] w-full border-b border-primary/30 bg-accent" />}
+          fallback={
+            <div className="h-[73px] w-full border-b border-primary/30 bg-accent" />
+          }
         >
           <RootNavHeader />
         </Suspense>

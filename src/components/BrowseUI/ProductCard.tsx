@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import AuthProductLink from "@/components/BrowseUI/AuthProductLink";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { formatUsdPrice } from "@/lib/payment";
 
 export type BrowseAd = {
   _id: string;
@@ -28,8 +29,7 @@ const rentTypeLabels: Record<string, string> = {
   month: "month",
 };
 
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("en-BD", { maximumFractionDigits: 2 }).format(value);
+const formatPrice = formatUsdPrice;
 
 interface ProductCardProps {
   ad: BrowseAd;

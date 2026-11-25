@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import {
   AlertCircle,
   CheckCircle2,
@@ -10,10 +11,10 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
-import { cn } from "cn";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
+import { useLoginSession } from "@/app/api/Session/UseLoginSession";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { authClient } from "@/lib/auth-client";
-import { useLoginSession } from "@/lib/API/Session/UseLoginSession";
+import { formatUsdPrice } from "@/lib/payment";
 
 type AdStatus = "pending" | "approved" | "rejected";
 
@@ -73,8 +74,7 @@ const rentTypeLabels: Record<string, string> = {
   month: "month",
 };
 
-const formatPrice = (value: number) =>
-  new Intl.NumberFormat("en-BD", { maximumFractionDigits: 2 }).format(value);
+const formatPrice = formatUsdPrice;
 
 const formatDate = (value?: string) => {
   if (!value) return "—";
@@ -105,7 +105,7 @@ const TableSkeleton = () => (
       <TableRow>
         <TableHead className="pl-4">Image</TableHead>
         <TableHead>Title</TableHead>
-        <TableHead>Price</TableHead>
+        <TableHead>Price (USD)</TableHead>
         <TableHead>Status</TableHead>
         <TableHead>Posted</TableHead>
         <TableHead className="pr-4 text-right">Action</TableHead>
@@ -253,7 +253,9 @@ const AllAds = () => {
             <p className="mt-4 text-sm font-semibold text-foreground">
               Could not load your ads
             </p>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">{error}</p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              {error}
+            </p>
             <Button
               type="button"
               variant="outline"
@@ -285,7 +287,7 @@ const AllAds = () => {
               <TableRow>
                 <TableHead className="w-24 pl-4">Image</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Price</TableHead>
+                <TableHead>Price (USD)</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Posted</TableHead>
                 <TableHead className="pr-4 text-right">Action</TableHead>
@@ -318,7 +320,7 @@ const AllAds = () => {
                   </TableCell>
                   <TableCell>
                     <p className="font-medium text-foreground">
-                      ৳{formatPrice(ad.price)}
+                      {formatPrice(ad.price)}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       / {rentTypeLabels[ad.rentType ?? "day"] ?? "day"}
