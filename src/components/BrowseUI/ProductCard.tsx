@@ -1,7 +1,7 @@
 import { MapPin } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
+import AuthProductLink from "@/components/BrowseUI/AuthProductLink";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 
 export type BrowseAd = {
@@ -38,10 +38,10 @@ const ProductCard = ({ ad }: ProductCardProps) => {
   const locationLabel = [ad.city, ad.location].filter(Boolean).join(" · ");
 
   return (
-    <Link
+    <AuthProductLink
       href={`/ads/${ad._id}`}
       className="group block h-full rounded-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-      aria-label={`View details for ${ad.title}`}
+      ariaLabel={`View details for ${ad.title}`}
     >
       <Card className="group/card h-full gap-0 overflow-hidden py-0 transition duration-300 group-hover/card:-translate-y-1 group-hover/card:shadow-lg">
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
@@ -72,7 +72,7 @@ const ProductCard = ({ ad }: ProductCardProps) => {
           )}
         </CardContent>
       </Card>
-    </Link>
+    </AuthProductLink>
   );
 };
 

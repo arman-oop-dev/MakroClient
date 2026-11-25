@@ -19,6 +19,7 @@ import Registration from "./Registration";
 
 interface SignInProps {
   onSuccess?: () => void;
+  redirectTo?: string;
 }
 
 const validateEmail = (value: string) => {
@@ -38,7 +39,7 @@ const validatePassword = (value: string) => {
   return "";
 };
 
-const SignIn = ({ onSuccess }: SignInProps) => {
+const SignIn = ({ onSuccess, redirectTo }: SignInProps) => {
   const router = useRouter();
   const [view, setView] = useState<"signin" | "registration">("signin");
   const [showPassword, setShowPassword] = useState(false);
@@ -88,7 +89,7 @@ const SignIn = ({ onSuccess }: SignInProps) => {
           (data.user as { role?: string } | undefined)?.role?.toLowerCase() ||
           "buyer";
         handleSuccess();
-        router.push(`/dashboard/${role}`);
+        router.push(redirectTo ?? `/dashboard/${role}`);
         router.refresh();
       }
     } catch (error) {
@@ -108,6 +109,7 @@ const SignIn = ({ onSuccess }: SignInProps) => {
       <Registration
         onSignIn={() => setView("signin")}
         onSuccess={handleSuccess}
+        redirectTo={redirectTo}
       />
     );
   }

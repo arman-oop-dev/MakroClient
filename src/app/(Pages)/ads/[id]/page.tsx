@@ -2,7 +2,8 @@ import { ArrowLeft, CalendarDays, MapPin, Package } from "lucide-react";
 import { cn } from "cn";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { notFound, unauthorized } from "next/navigation";
 import { Suspense } from "react";
 
 import { type BrowseAd } from "@/components/BrowseUI/ProductCard";
@@ -10,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { auth } from "@/lib/auth";
 
 const categoryLabels: Record<string, string> = {
   construction: "Construction",
@@ -177,6 +179,22 @@ const AdDetails = async ({ params }: { params: Promise<{ id: string }> }) => {
   );
 };
 
+const AuthenticatedAdDetails = async ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    unauthorized();
+  }
+
+  return <AdDetails params={params} />;
+};
+
 const AdDetailsPage = ({
   params,
 }: {
@@ -194,7 +212,7 @@ const AdDetailsPage = ({
         </Link>
 
         <Suspense fallback={<DetailsSkeleton />}>
-          <AdDetails params={params} />
+          <AuthenticatedAdDetails params={params} />
         </Suspense>
       </div>
     </main>

@@ -18,6 +18,7 @@ import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import AuthProductLink from "@/components/BrowseUI/AuthProductLink";
 import ProductCard, { type BrowseAd } from "@/components/BrowseUI/ProductCard";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -156,9 +157,10 @@ const FleetCard = ({ ad }: { ad: BrowseAd }) => {
   const rentLabel = rentTypeLabels[ad.rentType ?? "day"] ?? "day";
 
   return (
-    <Link
+    <AuthProductLink
       href={`/ads/${ad._id}`}
       className="group relative block overflow-hidden rounded-[1.75rem] border border-border/70 bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+      ariaLabel={`View details for ${ad.title}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
@@ -203,7 +205,7 @@ const FleetCard = ({ ad }: { ad: BrowseAd }) => {
           )}
         </div>
       </div>
-    </Link>
+    </AuthProductLink>
   );
 };
 

@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 interface RegistrationProps {
   onSignIn: () => void;
   onSuccess?: () => void;
+  redirectTo?: string;
 }
 
 const validateEmail = (value: string) => {
@@ -86,7 +87,11 @@ const getRegistrationErrorMessage = (error: unknown) => {
   return "Registration failed. Please try again.";
 };
 
-const Registration = ({ onSignIn, onSuccess }: RegistrationProps) => {
+const Registration = ({
+  onSignIn,
+  onSuccess,
+  redirectTo,
+}: RegistrationProps) => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,7 +140,7 @@ const Registration = ({ onSignIn, onSuccess }: RegistrationProps) => {
 
       if (data) {
         onSuccess?.();
-        router.push(`/dashboard/${role.toLowerCase()}`);
+        router.push(redirectTo ?? `/dashboard/${role.toLowerCase()}`);
         router.refresh();
       }
     } catch (error) {
