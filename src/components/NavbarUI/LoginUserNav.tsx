@@ -54,9 +54,9 @@ const LoginUserNavLink = ({ name, role }: userInfo) => {
         <NavigationMenuItem>
           <NavigationMenuTrigger
             aria-label={`${name} account menu`}
-            className="h-10 gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-white hover:bg-white/15 hover:text-white focus-visible:ring-primary data-open:bg-white/15 data-open:text-white data-popup-open:bg-white/15 data-popup-open:text-white"
+            className="h-10 max-w-20 gap-2 rounded-full border border-white/15 bg-white/10 px-2.5 text-white hover:bg-white/15 hover:text-white focus-visible:ring-primary data-open:bg-white/15 data-open:text-white data-popup-open:bg-white/15 data-popup-open:text-white sm:max-w-28 sm:px-3"
           >
-            <span className="max-w-28 truncate text-sm font-medium">
+            <span className="max-w-20 truncate text-sm font-medium sm:max-w-28">
               {name}
             </span>
           </NavigationMenuTrigger>
