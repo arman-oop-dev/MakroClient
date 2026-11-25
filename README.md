@@ -90,6 +90,7 @@ node --env-file=.env scripts/backfill-stripe-payments.mjs --apply
 - Listings link to `/ads/:id`.
 - Product detail pages require a signed-in user; logged-out visitors are sent to the home page with a `redirectTo` value.
 - Search and listing cards use the shared `ProductCard`, so home and browse cards stay consistent.
+- Approved ads are loaded from the Express API by default. If that API is unreachable, server components fall back to reading the same ads directly from MongoDB so public pages still work during backend downtime.
 
 ### Buyer rental checkout
 
