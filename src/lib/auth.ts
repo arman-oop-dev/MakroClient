@@ -15,6 +15,35 @@ if (!url) {
 const client = new MongoClient(url);
 const db = client.db("markro");
 
+const configuredAppUrl =
+  process.env.NEXT_APP_URL?.trim() ||
+  process.env.BETTER_AUTH_URL?.trim() ||
+  undefined;
+
+const configuredAppHost = (() => {
+  if (!configuredAppUrl) return undefined;
+
+  try {
+    return new URL(configuredAppUrl).host;
+  } catch {
+    return undefined;
+  }
+})();
+
+const baseURL = {
+  allowedHosts: [
+    ...(configuredAppHost ? [configuredAppHost] : []),
+    "makro-phi.vercel.app",
+    "*.vercel.app",
+    "localhost:3000",
+    "localhost",
+    "127.0.0.1:3000",
+    "127.0.0.1",
+  ],
+  fallback: configuredAppUrl ?? "http://localhost:3000",
+  protocol: "auto" as const,
+};
+
 const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
 
@@ -33,7 +62,11 @@ type UserWithRequestedRole = Record<string, unknown> & {
 };
 
 export const auth = betterAuth({
-  baseURL: process.env.NEXT_APP_URL,
+  baseURL,
+
+  advanced: {
+    trustedProxyHeaders: true,
+  },
 
   database: mongodbAdapter(db, {
     client,
