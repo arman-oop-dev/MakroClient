@@ -15,6 +15,19 @@ if (!url) {
 const client = new MongoClient(url);
 const db = client.db("markro");
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+
+const socialProviders =
+  googleClientId && googleClientSecret
+    ? {
+        google: {
+          clientId: googleClientId,
+          clientSecret: googleClientSecret,
+        },
+      }
+    : undefined;
+
 type UserWithRequestedRole = Record<string, unknown> & {
   requestedRole?: unknown;
 };
@@ -29,6 +42,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+
+  socialProviders,
 
   user: {
     additionalFields: {

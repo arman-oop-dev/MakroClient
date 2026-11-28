@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import GoogleAuthButton from "./GoogleAuthButton";
 
 interface RegistrationProps {
   onSignIn: () => void;
@@ -171,7 +172,7 @@ const Registration = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <h2 className="text-lg font-semibold text-foreground">
-        Register via email
+        Create your account
       </h2>
 
       {registrationError && (
@@ -183,6 +184,14 @@ const Registration = ({
           {registrationError}
         </div>
       )}
+
+      <GoogleAuthButton
+        redirectTo={redirectTo}
+        disabled={isSubmitting}
+        dividerLabel="or register with email"
+        onStart={() => setRegistrationError("")}
+        onError={setRegistrationError}
+      />
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <FieldGroup>

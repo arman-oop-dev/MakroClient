@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { useRouter } from "next/navigation";
+import GoogleAuthButton from "./GoogleAuthButton";
 import Registration from "./Registration";
 
 interface SignInProps {
@@ -117,9 +118,7 @@ const SignIn = ({ onSuccess, redirectTo }: SignInProps) => {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <h2 className="text-lg font-semibold text-foreground">
-        Sign in via email
-      </h2>
+      <h2 className="text-lg font-semibold text-foreground">Sign in</h2>
 
       {loginError && (
         <div
@@ -130,6 +129,14 @@ const SignIn = ({ onSuccess, redirectTo }: SignInProps) => {
           {loginError}
         </div>
       )}
+
+      <GoogleAuthButton
+        redirectTo={redirectTo}
+        disabled={isSubmitting}
+        dividerLabel="or sign in with email"
+        onStart={() => setLoginError("")}
+        onError={setLoginError}
+      />
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <FieldGroup>
