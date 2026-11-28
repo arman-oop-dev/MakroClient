@@ -128,7 +128,6 @@ const BrowseFilters = ({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [values, setValues] = useState<BrowseFilterValues>(current);
-  const [lastCurrent, setLastCurrent] = useState<BrowseFilterValues>(current);
 
   const { search, category, city, rentType } = current;
   const currentValues = useMemo(
@@ -136,16 +135,7 @@ const BrowseFilters = ({
     [search, category, city, rentType],
   );
 
-  if (!isSameFilters(currentValues, lastCurrent)) {
-    setLastCurrent(currentValues);
-    setValues(currentValues);
-  }
-
   const valuesRef = useRef(values);
-
-  useEffect(() => {
-    valuesRef.current = values;
-  }, [values]);
 
   const applyFilters = useCallback(
     (next: BrowseFilterValues) => {
@@ -169,7 +159,9 @@ const BrowseFilters = ({
   }, [values.search, currentValues.search, applyFilters]);
 
   const updateFilter = (patch: Partial<BrowseFilterValues>) => {
-    setValues((previous) => ({ ...previous, ...patch }));
+    const next = { ...valuesRef.current, ...patch };
+    valuesRef.current = next;
+    setValues(next);
   };
 
   const hasFilters =

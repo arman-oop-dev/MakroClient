@@ -2,6 +2,8 @@ import "server-only";
 
 import { MongoClient, ObjectId, type Db } from "mongodb";
 
+import { SELLER_PRICE_CENTS, SELLER_PRO_PRODUCT } from "@/lib/payment";
+
 const url = (() => {
   const value = process.env.BETTER_AUTH_DB_URL;
 
@@ -66,7 +68,6 @@ const serializePayment = (
 });
 
 export const FREE_AD_LIMIT = 2;
-const SELLER_PRO_PRODUCT = "seller_pro";
 
 export async function hasPaidSellerPayment(userId: string) {
   const db = await getPaymentsDb();
@@ -162,6 +163,13 @@ type RecordPaymentInput = {
 };
 
 export async function recordSellerPayment(input: RecordPaymentInput) {
+  if (
+    input.amountCents !== SELLER_PRICE_CENTS ||
+    input.currency.toLowerCase() !== "usd"
+  ) {
+    throw new Error("This is not a valid seller pro payment.");
+  }
+
   const db = await getPaymentsDb();
   const collection = db.collection<StoredSellerPayment>("payments");
 
@@ -170,23 +178,55 @@ export async function recordSellerPayment(input: RecordPaymentInput) {
   const now = new Date();
   const filter = { sessionId: input.sessionId };
 
-  await collection.updateOne(
-    filter,
-    {
-      $setOnInsert: { createdAt: now },
-      $set: {
-        userId: input.userId,
-        sessionId: input.sessionId,
-        amountCents: input.amountCents,
-        currency: input.currency,
-        product: SELLER_PRO_PRODUCT,
-        status: "paid",
-        email: input.email,
-        paidAt: now,
+  const assertMatchingPayment = (payment: StoredSellerPayment) => {
+    if (
+      payment.product !== SELLER_PRO_PRODUCT ||
+      payment.userId !== input.userId ||
+      payment.amountCents !== input.amountCents
+    ) {
+      throw new Error(
+        "This Stripe session was already recorded for a different payment.",
+      );
+    }
+  };
+
+  const existing = await collection.findOne(filter);
+
+  if (existing) {
+    assertMatchingPayment(existing);
+    return serializePayment(existing);
+  }
+
+  try {
+    await collection.updateOne(
+      filter,
+      {
+        $setOnInsert: { createdAt: now },
+        $set: {
+          userId: input.userId,
+          sessionId: input.sessionId,
+          amountCents: input.amountCents,
+          currency: input.currency,
+          product: SELLER_PRO_PRODUCT,
+          status: "paid",
+          email: input.email,
+          paidAt: now,
+        },
       },
-    },
-    { upsert: true },
-  );
+      { upsert: true },
+    );
+  } catch (error) {
+    // Two requests can race on the unique sessionId index. The winner owns
+    // the record; re-check it instead of failing an otherwise valid payment.
+    if ((error as { code?: number }).code !== 11000) throw error;
+
+    const concurrent = await collection.findOne(filter);
+
+    if (!concurrent) throw error;
+
+    assertMatchingPayment(concurrent);
+    return serializePayment(concurrent);
+  }
 
   const payment = await collection.findOne(filter);
 

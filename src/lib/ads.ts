@@ -142,7 +142,9 @@ export async function getAds(suffix = ""): Promise<BrowseAd[]> {
         const result = await response.json().catch(() => null);
 
         if (Array.isArray(result?.data)) {
-          return result.data as BrowseAd[];
+          return (result.data as BrowseAd[]).filter(
+            (ad) => !ad.status || ad.status === "approved",
+          );
         }
       }
     } catch (error) {
@@ -170,10 +172,12 @@ export async function getApprovedAdById(
       if (response.ok) {
         const result = await response.json().catch(() => null);
         const ads = Array.isArray(result?.data) ? (result.data as BrowseAd[]) : [];
-
-        return (
-          ads.find((ad) => ad._id === adId && ad.status === "approved") ?? null
+        const match = ads.find(
+          (ad) =>
+            ad._id === adId && (!ad.status || ad.status === "approved"),
         );
+
+        if (match) return match;
       }
     } catch (error) {
       console.warn(

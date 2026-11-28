@@ -1,5 +1,17 @@
 export const SELLER_PRODUCT_NAME = "Markro Selling Pro Account";
+export const SELLER_PRO_PRODUCT = "seller_pro";
 export const SELLER_PRICE_CENTS = 2000;
+
+type SellerCheckoutLike = {
+  metadata?: { product?: string | null } | null;
+  amount_total?: number | null;
+  currency?: string | null;
+};
+
+export const isSellerProCheckout = (session: SellerCheckoutLike) =>
+  session.metadata?.product === SELLER_PRO_PRODUCT &&
+  session.amount_total === SELLER_PRICE_CENTS &&
+  (session.currency ?? "usd").toLowerCase() === "usd";
 
 export const formatUsd = (amountInCents: number) =>
   new Intl.NumberFormat("en-US", {

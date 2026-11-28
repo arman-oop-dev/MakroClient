@@ -145,7 +145,7 @@ const Registration = ({
         email,
         name: fullName,
         password,
-        role,
+        requestedRole: role,
       });
 
       if (error) {

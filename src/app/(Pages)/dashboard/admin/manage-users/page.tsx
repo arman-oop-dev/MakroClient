@@ -1,7 +1,7 @@
-import DashboardPlaceholder from "@/components/DashboardUI/dashboard-placeholder";
+import ManageUsers from "@/components/DashboardUI/Admin/ManageUsers";
 
 const Page = () => {
-  return <DashboardPlaceholder />;
+  return <ManageUsers />;
 };
 
 export default Page;

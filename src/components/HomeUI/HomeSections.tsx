@@ -20,23 +20,8 @@ import Link from "next/link";
 import ProductCard, { type BrowseAd } from "@/components/BrowseUI/ProductCard";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAds } from "@/lib/ads";
 import { cn } from "@/lib/utils";
-
-const getAds = async (query: string): Promise<BrowseAd[]> => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/ads${query}`,
-      { cache: "no-store" },
-    );
-
-    if (!response.ok) return [];
-
-    const result = await response.json();
-    return Array.isArray(result?.data) ? (result.data as BrowseAd[]) : [];
-  } catch {
-    return [];
-  }
-};
 
 interface SectionHeadingProps {
   eyebrow: string;

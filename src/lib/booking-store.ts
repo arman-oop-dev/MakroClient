@@ -96,23 +96,32 @@ export async function recordBuyerBooking(
     payments.createIndex({ sessionId: 1 }, { unique: true }),
   ]);
 
-  const bookingUpdate = await bookings.updateOne(
-    { sessionId: input.sessionId },
-    {
-      $setOnInsert: { createdAt: now },
-      $set: {
-        ...input,
-        status: "paid",
-        paidAt: now,
-      },
-    },
-    { upsert: true },
-  );
+  let bookingCreated = false;
 
-  const quantityUpdated =
-    bookingUpdate.upsertedCount > 0
-      ? await decrementAdQuantity(db, input.adId)
-      : false;
+  try {
+    const bookingUpdate = await bookings.updateOne(
+      { sessionId: input.sessionId },
+      {
+        $setOnInsert: { createdAt: now },
+        $set: {
+          ...input,
+          status: "paid",
+          paidAt: now,
+        },
+      },
+      { upsert: true },
+    );
+
+    bookingCreated = bookingUpdate.upsertedCount > 0;
+  } catch (error) {
+    // Concurrent visits to the success URL race on the unique index. Treat
+    // the existing booking as the winner without decrementing twice.
+    if ((error as { code?: number }).code !== 11000) throw error;
+  }
+
+  const quantityUpdated = bookingCreated
+    ? await decrementAdQuantity(db, input.adId)
+    : false;
 
   await payments.updateOne(
     { sessionId: input.sessionId },
@@ -142,7 +151,7 @@ export async function recordBuyerBooking(
 
   return {
     booking: serializeBooking(booking),
-    bookingCreated: bookingUpdate.upsertedCount > 0,
+    bookingCreated,
     quantityUpdated,
   };
 }

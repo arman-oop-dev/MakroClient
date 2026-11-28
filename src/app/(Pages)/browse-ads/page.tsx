@@ -8,6 +8,7 @@ import MobileFilters from "@/components/BrowseUI/MobileFilters";
 import ProductCard, { type BrowseAd } from "@/components/BrowseUI/ProductCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAds as getApprovedAds } from "@/lib/ads";
 
 export const metadata = {
   title: "Browse Ads | Markro",
@@ -57,27 +58,9 @@ const buildAdsQuery = (params: BrowseSearchParams) => {
 
 const getAds = async (query = ""): Promise<AdsResult> => {
   const suffix = query ? `?${query}` : "";
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/ads${suffix}`,
-    { cache: "no-store" },
-  );
+  const ads = await getApprovedAds(suffix);
 
-  if (!response.ok) {
-    throw new Error("Failed to load ads.");
-  }
-
-  const result = await response.json();
-  if (!result?.success || !Array.isArray(result?.data)) {
-    return { ads: [], totalAds: 0 };
-  }
-
-  return {
-    ads: result.data as BrowseAd[],
-    totalAds:
-      typeof result.totalAds === "number"
-        ? result.totalAds
-        : result.data.length,
-  };
+  return { ads, totalAds: ads.length };
 };
 
 const uniqueOptions = (values: Array<string | undefined>) =>
@@ -157,7 +140,7 @@ const BrowseAdsContent = async ({
   return (
     <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
       <aside className="hidden lg:sticky lg:top-6 lg:block lg:self-start">
-        <BrowseFilters {...filterProps} />
+        <BrowseFilters key={query || "all"} {...filterProps} />
       </aside>
 
       <section className="min-w-0">
@@ -171,7 +154,7 @@ const BrowseAdsContent = async ({
                 Showing filtered results
               </p>
             )}
-            <MobileFilters {...filterProps} />
+            <MobileFilters key={query || "all"} {...filterProps} />
           </div>
         </div>
 

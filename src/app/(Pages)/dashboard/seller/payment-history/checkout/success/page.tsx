@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { auth } from "@/lib/auth";
-import { formatUsd, SELLER_PRICE_CENTS } from "@/lib/payment";
+import {
+  formatUsd,
+  isSellerProCheckout,
+  SELLER_PRICE_CENTS,
+} from "@/lib/payment";
 import { recordSellerPayment } from "@/lib/payment-store";
 import { getStripe } from "@/lib/stripe";
 import { cn } from "cn";
@@ -91,6 +95,17 @@ const CheckoutSuccessPage = async ({
     redirect("/");
   }
 
+  if (String(session.user.role ?? "").toLowerCase() !== "seller") {
+    return (
+      <StatusCard
+        title="Seller access is required"
+        description="Only seller accounts can activate selling access."
+        footerHref="/dashboard"
+        footerLabel="Back to dashboard"
+      />
+    );
+  }
+
   if (!session_id) {
     return (
       <StatusCard
@@ -137,6 +152,15 @@ const CheckoutSuccessPage = async ({
       <StatusCard
         title="Payment is not complete"
         description="Stripe has not confirmed this payment yet. Please try again or contact support."
+      />
+    );
+  }
+
+  if (!isSellerProCheckout(checkoutSession)) {
+    return (
+      <StatusCard
+        title="This payment does not unlock selling"
+        description="The Stripe session is not for the Markro Selling Pro Account. Start the seller checkout to continue."
       />
     );
   }

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { SELLER_PRICE_CENTS } from "@/lib/payment";
+import { isSellerProCheckout } from "@/lib/payment";
 import { recordSellerPayment } from "@/lib/payment-store";
 import { getStripe } from "@/lib/stripe";
 import { headers } from "next/headers";
@@ -59,10 +59,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!isSellerProCheckout(checkoutSession)) {
+      return NextResponse.json(
+        { error: "This is not a seller pro payment." },
+        { status: 400 },
+      );
+    }
+
     const payment = await recordSellerPayment({
       userId: session.user.id,
       sessionId: checkoutSession.id,
-      amountCents: checkoutSession.amount_total ?? SELLER_PRICE_CENTS,
+      amountCents: checkoutSession.amount_total ?? 0,
       currency: checkoutSession.currency ?? "usd",
       email:
         checkoutSession.customer_details?.email ??

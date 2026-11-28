@@ -1,5 +1,10 @@
+import { getAppOrigin } from "@/lib/app-url";
 import { auth } from "@/lib/auth";
-import { SELLER_PRICE_CENTS, SELLER_PRODUCT_NAME } from "@/lib/payment";
+import {
+  SELLER_PRICE_CENTS,
+  SELLER_PRODUCT_NAME,
+  SELLER_PRO_PRODUCT,
+} from "@/lib/payment";
 import { hasPaidSellerPayment } from "@/lib/payment-store";
 import { getStripe } from "@/lib/stripe";
 import { headers } from "next/headers";
@@ -27,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const origin = headerList.get("origin") ?? request.nextUrl.origin;
+    const origin = getAppOrigin(request.nextUrl.origin);
 
     if (await hasPaidSellerPayment(session.user.id)) {
       return NextResponse.redirect(
@@ -56,7 +61,7 @@ export async function POST(request: NextRequest) {
         : {}),
       metadata: {
         userId: session.user.id,
-        product: "seller_pro",
+        product: SELLER_PRO_PRODUCT,
       },
       success_url: `${origin}/dashboard/seller/payment-history/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/dashboard/seller/payment-history/checkout?canceled=true`,

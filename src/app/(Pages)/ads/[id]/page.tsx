@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getApprovedAdById } from "@/lib/ads";
 import { auth } from "@/lib/auth";
 import { formatUsdPrice } from "@/lib/payment";
 
@@ -84,12 +85,14 @@ const AdDetails = async ({
   const [{ id }, { checkout }] = await Promise.all([params, searchParams]);
   const checkoutMessage = checkout ? checkoutMessages[checkout] : undefined;
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/ads`, {
-    cache: "no-store",
-  });
-  const result = await response.json().catch(() => null);
-  const ads = Array.isArray(result?.data) ? (result.data as BrowseAd[]) : [];
-  const ad = ads.find((item) => item._id === id);
+  let ad;
+
+  try {
+    ad = await getApprovedAdById(id);
+  } catch (error) {
+    console.error("Failed to load ad details", error);
+    notFound();
+  }
 
   if (!ad) notFound();
 

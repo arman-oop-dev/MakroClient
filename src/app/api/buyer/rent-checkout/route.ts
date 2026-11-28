@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getApprovedAdById } from "@/lib/ads";
+import { getAppOrigin } from "@/lib/app-url";
 import { getAdPriceInCents, getRentLabel, RENTAL_PRODUCT } from "@/lib/booking";
 import { auth } from "@/lib/auth";
 import { getStripe } from "@/lib/stripe";
@@ -59,8 +60,7 @@ export async function POST(request: NextRequest) {
   }
 
   const rentLabel = getRentLabel(ad.rentType);
-  const origin = new URL("/", headerList.get("origin") ?? request.nextUrl.origin)
-    .origin;
+  const origin = getAppOrigin(request.nextUrl.origin);
   const successUrl = `${origin}/checkout/rent/success?session_id={CHECKOUT_SESSION_ID}`;
 
   const cancelUrl = new URL(`/ads/${encodeURIComponent(adId)}`, origin);
